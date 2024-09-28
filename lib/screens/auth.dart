@@ -23,6 +23,7 @@ class _AuthScreen extends State<AuthScreen> {
   var _enteredEmail = "";
   var _enteredPassword = "";
   File? _selectedImage;
+  var _isAuthenticating = false;
 
   void _submit() async {
     final _isValid = _form.currentState!.validate();
@@ -34,6 +35,9 @@ class _AuthScreen extends State<AuthScreen> {
     _form.currentState!.save();
 
     try {
+      setState(() {
+        _isAuthenticating = true;
+      });
       if (_isLogin) {
         final userCredentials = await _firebase.signInWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
@@ -60,6 +64,9 @@ class _AuthScreen extends State<AuthScreen> {
           content: Text(error.message ?? 'Authentication failed'),
         ),
       );
+      setState(() {
+        _isAuthenticating = false;
+      });
     }
   }
 
@@ -132,6 +139,9 @@ class _AuthScreen extends State<AuthScreen> {
                             },
                           ),
                           const SizedBox(height: 12),
+                          if (_isAuthenticating)
+                            const CircularProgressIndicator(),
+                          if (!_isAuthenticating)
                           ElevatedButton(
                             onPressed: _submit,
                             style: ElevatedButton.styleFrom(
@@ -142,6 +152,7 @@ class _AuthScreen extends State<AuthScreen> {
                             child: Text(_isLogin ? "Login" : "Sign up"),
                           ),
                           const SizedBox(height: 12),
+                          if (!_isAuthenticating)
                           TextButton(
                             onPressed: () {
                               setState(() {
