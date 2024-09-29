@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:chat_app/widgets/user_image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +53,15 @@ class _AuthScreen extends State<AuthScreen> {
 
         await storageRef.putFile(_selectedImage!);
         final imageUrl = await storageRef.getDownloadURL();
-        print(imageUrl);
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredentials.user!.uid)
+            .set({
+              "username": "to be done...",
+              "email": _enteredEmail,
+              "image_url": imageUrl,             
+            });
       }
     } on FirebaseAuthException catch (error) {
       if (error.code == 'email-already-in-use') {
@@ -142,27 +151,28 @@ class _AuthScreen extends State<AuthScreen> {
                           if (_isAuthenticating)
                             const CircularProgressIndicator(),
                           if (!_isAuthenticating)
-                          ElevatedButton(
-                            onPressed: _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
+                            ElevatedButton(
+                              onPressed: _submit,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer,
+                              ),
+                              child: Text(_isLogin ? "Login" : "Sign up"),
                             ),
-                            child: Text(_isLogin ? "Login" : "Sign up"),
-                          ),
                           const SizedBox(height: 12),
                           if (!_isAuthenticating)
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _isLogin = !_isLogin; // checks for the opposit
-                              });
-                            },
-                            child: Text(_isLogin
-                                ? "Create new account"
-                                : "I already have an account"),
-                          ),
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isLogin =
+                                      !_isLogin; // checks for the opposit
+                                });
+                              },
+                              child: Text(_isLogin
+                                  ? "Create new account"
+                                  : "I already have an account"),
+                            ),
                         ],
                       ),
                     ),
