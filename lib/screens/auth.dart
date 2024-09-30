@@ -23,8 +23,10 @@ class _AuthScreen extends State<AuthScreen> {
   var _isLogin = true;
   var _enteredEmail = "";
   var _enteredPassword = "";
+  var _enteredUsername = "";
   File? _selectedImage;
   var _isAuthenticating = false;
+  
 
   void _submit() async {
     final _isValid = _form.currentState!.validate();
@@ -58,10 +60,10 @@ class _AuthScreen extends State<AuthScreen> {
             .collection('users')
             .doc(userCredentials.user!.uid)
             .set({
-              "username": "to be done...",
-              "email": _enteredEmail,
-              "image_url": imageUrl,             
-            });
+          "username": _enteredUsername,
+          "email": _enteredEmail,
+          "image_url": imageUrl,
+        });
       }
     } on FirebaseAuthException catch (error) {
       if (error.code == 'email-already-in-use') {
@@ -115,23 +117,42 @@ class _AuthScreen extends State<AuthScreen> {
                               },
                             ),
                           TextFormField(
-                              decoration: const InputDecoration(
-                                labelText: "Email",
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              autocorrect: false,
-                              textCapitalization: TextCapitalization.none,
-                              validator: (value) {
-                                if (value == null ||
-                                    value.trim().isEmpty ||
-                                    !value.contains("@")) {
-                                  return "Please enter a valid email address";
-                                }
-                                return null;
-                              },
-                              onSaved: (value) {
-                                _enteredEmail = value!;
-                              }),
+                            decoration: const InputDecoration(
+                              labelText: "Email",
+                            ),
+                            keyboardType: TextInputType.emailAddress,
+                            autocorrect: false,
+                            textCapitalization: TextCapitalization.none,
+                            validator: (value) {
+                              if (value == null ||
+                                  value.trim().isEmpty ||
+                                  !value.contains("@")) {
+                                return "Please enter a valid email address";
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _enteredEmail = value!;
+                            },
+                          ),
+                          if (!_isLogin)
+                          TextFormField(
+                            decoration: const InputDecoration(
+                              labelText: "Username",
+                            ),
+                            enableSuggestions: false,
+                            validator: (value) {
+                              if (value == null ||
+                                  value.isEmpty ||
+                                  value.trim().length < 4) {
+                                return "Password must be at least 4 characters long";
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _enteredUsername = value!;
+                            },
+                          ),
                           TextFormField(
                             decoration: const InputDecoration(
                               labelText: "Password",
